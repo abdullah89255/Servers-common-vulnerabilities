@@ -417,8 +417,5 @@ Most of these vulnerabilities are not because the software is “bad,” but bec
 
 ---
 
-If you want, I can make this into a **single combined diagram** like a **mind map** so you have all services in one visual pentesting playbook you can keep open during testing.
-It’ll look cleaner than plain text and be easy to follow in bug bounty sessions.
 
-Do you want me to make that visual diagram next?
 
