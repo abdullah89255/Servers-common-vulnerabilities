@@ -132,4 +132,172 @@ Most of these vulnerabilities are not because the software is “bad,” but bec
 
 ---
 
-If you want, I can also give you **a complete table with the services, vulnerabilities, and example CVEs** so you have a ready-made reference for security work. That would make it much easier for bug bounty or pentesting use.
+Alright, I’ll walk you through **how bug bounty hunters typically approach exploiting Apache, IIS, Nginx, MySQL, FTP, and SSH** — but we’ll keep it **ethical** so you can apply it only on authorized targets (your own lab or approved bug bounty programs).
+
+This will be like a **pentester’s roadmap** rather than a “copy-paste attack” guide, so you understand the process from recon to exploitation.
+
+---
+
+## **1. Apache HTTP Server**
+
+**Recon:**
+
+* Find version:
+
+  ```bash
+  curl -I http://target.com
+  ```
+
+  or
+
+  ```bash
+  whatweb target.com
+  ```
+* Look for `/server-status` (if mod\_status enabled)
+
+  ```bash
+  curl http://target.com/server-status
+  ```
+
+**Exploitation (common in BB programs):**
+
+* Directory traversal → `http://target.com/../../etc/passwd`
+* Misconfigured modules → Test with **Nmap NSE scripts**:
+
+  ```bash
+  nmap --script http-apache-server-status target.com
+  ```
+* CVE search for version:
+
+  ```bash
+  searchsploit apache <version>
+  ```
+
+---
+
+## **2. Microsoft IIS**
+
+**Recon:**
+
+* Detect version:
+
+  ```bash
+  whatweb target.com
+  ```
+* Check HTTP methods:
+
+  ```bash
+  nmap --script http-methods target.com
+  ```
+
+**Exploitation:**
+
+* WebDAV enabled → Upload shell via `cadaver` or `davtest`
+* Known CVEs for outdated versions (e.g., buffer overflow, CVE-2017-7269)
+* Default files: `/iisstart.htm`, `/scripts/`
+
+---
+
+## **3. Nginx**
+
+**Recon:**
+
+* Detect version:
+
+  ```bash
+  whatweb target.com
+  ```
+* Check for reverse proxy misconfig:
+
+  ```bash
+  curl -I http://target.com
+  ```
+
+**Exploitation:**
+
+* HTTP request smuggling → test with **smuggler.py**
+* Path traversal if `alias` misconfigured:
+  `http://target.com/static../etc/passwd`
+* CVEs for Nginx modules
+
+---
+
+## **4. MySQL**
+
+**Recon:**
+
+* Test open port 3306:
+
+  ```bash
+  nmap -p 3306 --script mysql* target.com
+  ```
+* Try weak creds: `root:root`
+  **Exploitation:**
+* SQL Injection in web apps → Use **sqlmap**:
+
+  ```bash
+  sqlmap -u "http://target.com/page?id=1" --dbs
+  ```
+* Privilege escalation with `LOAD_FILE()` and `SELECT INTO OUTFILE` if writable.
+
+---
+
+## **5. FTP**
+
+**Recon:**
+
+* Check anonymous login:
+
+  ```bash
+  ftp target.com
+  ```
+* Banner grab for version:
+
+  ```bash
+  nc target.com 21
+  ```
+
+**Exploitation:**
+
+* Anonymous login → Upload web shell if web root accessible
+* Directory traversal → `GET ../../../../etc/passwd`
+* Brute-force with **hydra**:
+
+  ```bash
+  hydra -l admin -P passwords.txt ftp://target.com
+  ```
+
+---
+
+## **6. SSH**
+
+**Recon:**
+
+* Check port 22:
+
+  ```bash
+  nmap -p 22 target.com
+  ```
+
+**Exploitation:**
+
+* Brute-force with **hydra** or **medusa** (only if allowed in scope):
+
+  ```bash
+  hydra -l root -P passwords.txt ssh://target.com
+  ```
+* CVEs for specific OpenSSH versions
+* Weak key reuse (search `.ssh/authorized_keys` via other vulnerabilities)
+
+---
+
+💡 **Bug Bounty Tips:**
+
+* Always start with **recon → version detection → CVE research**
+* Use tools like `nmap`, `whatweb`, `gobuster`, `sqlmap`, `hydra`, `metasploit`
+* Double-check **program scope** before testing — brute-forcing or denial-of-service is often *out of scope*
+
+---
+
+If you want, I can make you **a full exploitation flowchart** for all 6 services, so you can follow it step-by-step in a bug bounty or lab environment.
+It would be like a personal **pentesting playbook** for each service.
