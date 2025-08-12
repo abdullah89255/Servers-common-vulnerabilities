@@ -132,9 +132,6 @@ Most of these vulnerabilities are not because the software is “bad,” but bec
 
 ---
 
-Alright, I’ll walk you through **how bug bounty hunters typically approach exploiting Apache, IIS, Nginx, MySQL, FTP, and SSH** — but we’ll keep it **ethical** so you can apply it only on authorized targets (your own lab or approved bug bounty programs).
-
-This will be like a **pentester’s roadmap** rather than a “copy-paste attack” guide, so you understand the process from recon to exploitation.
 
 ---
 
@@ -299,5 +296,129 @@ This will be like a **pentester’s roadmap** rather than a “copy-paste attack
 
 ---
 
-If you want, I can make you **a full exploitation flowchart** for all 6 services, so you can follow it step-by-step in a bug bounty or lab environment.
-It would be like a personal **pentesting playbook** for each service.
+
+---
+
+## **🔍 Bug Bounty Exploitation Flowchart for 6 Services**
+
+### **\[1] Apache HTTP Server**
+
+```
+[Detect Apache] → whatweb/curl/nmap → [Get Version] 
+     ↓
+[Search CVEs for version] → searchsploit / CVE databases
+     ↓
+[Check Misconfigs] → /server-status, directory listing, .htaccess exposed
+     ↓
+[Try Exploits]
+   - Directory Traversal → ../../etc/passwd
+   - Vulnerable Modules (mod_php, mod_ssl)
+   - SSL/TLS Weakness → testssl.sh
+```
+
+---
+
+### **\[2] Microsoft IIS**
+
+```
+[Detect IIS] → whatweb/nmap banner grab
+     ↓
+[Check HTTP Methods] → nmap --script http-methods
+     ↓
+[Check WebDAV] → davtest/cadaver
+     ↓
+[Search CVEs for version]
+     ↓
+[Try Exploits]
+   - WebDAV upload shell
+   - Default files (/iisstart.htm, /scripts/)
+   - Path traversal / file read bugs
+```
+
+---
+
+### **\[3] Nginx**
+
+```
+[Detect Nginx] → whatweb/nmap
+     ↓
+[Check for Reverse Proxy Leak] → Host header injection test
+     ↓
+[Search CVEs for version]
+     ↓
+[Try Exploits]
+   - HTTP Request Smuggling → smuggler.py
+   - Alias Path Traversal → /static../etc/passwd
+   - Misconfigured proxy bypass
+```
+
+---
+
+### **\[4] MySQL**
+
+```
+[Check Port 3306] → nmap -p 3306 --script mysql*
+     ↓
+[Check for Weak Credentials] → hydra/medusa
+     ↓
+[Check in Web App for SQLi] → sqlmap manual test
+     ↓
+[Search CVEs for version]
+     ↓
+[Try Exploits]
+   - SQL Injection (UNION, Boolean, Time-based)
+   - Priv Esc → SELECT INTO OUTFILE, LOAD_FILE()
+   - Password reuse for lateral movement
+```
+
+---
+
+### **\[5] FTP**
+
+```
+[Check Port 21] → nmap -p 21
+     ↓
+[Anonymous Login?] → ftp target.com
+     ↓
+[Banner Grab for Version] → nc target.com 21
+     ↓
+[Search CVEs for version]
+     ↓
+[Try Exploits]
+   - Upload Web Shell if web root accessible
+   - Directory Traversal → GET ../../etc/passwd
+   - Brute-force with hydra
+```
+
+---
+
+### **\[6] SSH**
+
+```
+[Check Port 22] → nmap -p 22
+     ↓
+[Banner Grab for Version] → nc target.com 22
+     ↓
+[Search CVEs for version]
+     ↓
+[Try Exploits]
+   - Brute-force with hydra/medusa
+   - Weak key reuse
+   - Exploit outdated OpenSSH vulnerabilities
+```
+
+---
+
+## **🗂 Suggested Toolset**
+
+* **Recon:** `nmap`, `whatweb`, `gobuster`, `nikto`
+* **Exploitation:** `hydra`, `sqlmap`, `metasploit`, `smuggler.py`, `davtest`
+* **Post-Exploitation:** `linpeas.sh`, manual privilege escalation
+
+---
+
+If you want, I can make this into a **single combined diagram** like a **mind map** so you have all services in one visual pentesting playbook you can keep open during testing.
+It’ll look cleaner than plain text and be easy to follow in bug bounty sessions.
+
+Do you want me to make that visual diagram next?
+
